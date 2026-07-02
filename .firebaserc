@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "netflixgpt-e2b5e"
-  }
+    "default": "learning-movie-app"
+  },
+  "targets": {},
+  "etags": {}
 }
