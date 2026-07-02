@@ -70,8 +70,12 @@ const Login = () => {
           </button>
           <p className="py-4 cursor-pointer" onClick={toggleSignInForm}>
             {isSignInForm
-              ? "New to Netflix? Sign Up Now"
+              ? "New to MovieApp? Sign Up Now"
               : "Already Registered? Sign In Now"}
+          </p>
+          <p className="text-sm text-white font-bold text-center pt-4 border-t border-gray-600">
+            This is a personal learning project and is not affiliated with or
+            endorsed by Netflix. Not for production use.
           </p>
         </form>
       </div>
