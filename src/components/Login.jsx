@@ -40,7 +40,6 @@ const Login = () => {
           .then((userCredential) => {
             // Signed up
             const user = userCredential.user;
-            console.log(user);
             updateProfile(user, {
               displayName: nameRef.current.value,
               //update custom image, I am adding smile user icon
@@ -72,7 +71,6 @@ const Login = () => {
             const errorCode = error.code;
             const errorMessage = error.message;
             setErrorMessage(errorMessage);
-            console.log(errorCode + "-" + errorMessage);
             // ..
           });
       } else {
@@ -84,7 +82,6 @@ const Login = () => {
           .then((userCredential) => {
             // Signed in
             const user = userCredential.user;
-            console.log(user);
             const { uid, email, displayName, photoURL } = user;
             dispatch(
               addUser({
@@ -100,7 +97,6 @@ const Login = () => {
             const errorCode = error.code;
             const errorMessage = error.message;
             setErrorMessage(errorMessage);
-            console.log(errorCode + "-" + errorMessage);
           });
       }
     }
