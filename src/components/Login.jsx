@@ -45,8 +45,9 @@ const Login = () => {
             console.log(user);
             updateProfile(user, {
               displayName: nameRef.current.value,
+              //update custom image, I am adding smile user icon
               photoURL:
-                "https://t3.ftcdn.net/jpg/02/70/35/00/360_F_270350073_WO6yQAdptEnAhYKM5GuA9035wbRnVJSr.jpg",
+                "https://occ-0-1217-1218.1.nflxso.net/dnm/api/v6/SO2HoVCx33X8phZh2pZZmQ4QgNY/AAAABS8sWFjSyj1zyfgcnGamqyJ1E2ZubZGo8dndCM_ipf_5UpmVlkuf8IXzQlmPZQqTMWNjWukESRdLkFGHnf7zbY3MJCO3r4s.png?r=229",
             })
               .then(() => {
                 // Profile updated!

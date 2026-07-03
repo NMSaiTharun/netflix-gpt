@@ -26,7 +26,10 @@ const Header = () => {
       </h1>
       {user && (
         <div className="flex p-2">
-          <img className="w-12 h-12" src={user?.photoURL} />
+          <div className="flex flex-col items-center">
+            <img className="w-12 h-12 mb-1" src={user?.photoURL} />
+            <p className="font-bold text-white">{user?.displayName}</p>
+          </div>
           <button
             onClick={callSignOut}
             className="font-bold text-white ml-2 hover:cursor-pointer"
