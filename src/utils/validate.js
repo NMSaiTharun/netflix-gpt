@@ -5,11 +5,11 @@ const validateForm = (name, email, password, checkNameValidation) => {
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
   if (checkNameValidation && !nameRegex.test(name)) {
-    return "Invalid user name, Please enter correct user name";
+    return "Invalid user name, Please enter valid user name";
   } else if (!emailRegexValid.test(email)) {
-    return "Invalid email id, Please enter correct email id";
+    return "Invalid email id, Please enter valid email id";
   } else if (!passwordRegex.test(password)) {
-    return "Invalid password, Please enter correct password";
+    return "Invalid password, Please enter valid password";
   } else {
     return;
   }

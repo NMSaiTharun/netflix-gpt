@@ -1,10 +1,21 @@
 import { useRef, useState } from "react";
 import Header from "./Header";
 import validateForm from "../utils/validate";
+import { auth } from "../utils/firebase";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice";
 
 const Login = () => {
   const [isSignInForm, setIsSignInForm] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const nameRef = useRef(null);
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
@@ -21,6 +32,81 @@ const Login = () => {
       !isSignInForm,
     );
     setErrorMessage(errorMessage);
+    if (!errorMessage) {
+      if (!isSignInForm) {
+        createUserWithEmailAndPassword(
+          auth,
+          emailRef.current.value,
+          passwordRef.current.value,
+        )
+          .then((userCredential) => {
+            // Signed up
+            const user = userCredential.user;
+            console.log(user);
+            updateProfile(user, {
+              displayName: nameRef.current.value,
+              photoURL:
+                "https://t3.ftcdn.net/jpg/02/70/35/00/360_F_270350073_WO6yQAdptEnAhYKM5GuA9035wbRnVJSr.jpg",
+            })
+              .then(() => {
+                // Profile updated!
+                // ...
+                const { uid, email, displayName, photoURL } = auth.currentUser;
+                dispatch(
+                  addUser({
+                    uid: uid,
+                    email: email,
+                    displayName: displayName,
+                    photoURL: photoURL,
+                  }),
+                );
+                navigate("/browse");
+              })
+              .catch((error) => {
+                // An error occurred
+                // ...
+                setErrorMessage(error.message);
+              });
+
+            // ...
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            setErrorMessage(errorMessage);
+            console.log(errorCode + "-" + errorMessage);
+            // ..
+          });
+      } else {
+        signInWithEmailAndPassword(
+          auth,
+          emailRef.current.value,
+          passwordRef.current.value,
+        )
+          .then((userCredential) => {
+            // Signed in
+            const user = userCredential.user;
+            console.log(user);
+            const { uid, email, displayName, photoURL } = user;
+            dispatch(
+              addUser({
+                uid: uid,
+                email: email,
+                displayName: displayName,
+                photoURL: photoURL,
+              }),
+            );
+            navigate("/browse");
+            // ...
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            setErrorMessage(errorMessage);
+            console.log(errorCode + "-" + errorMessage);
+          });
+      }
+    }
   };
 
   return (
