@@ -9,6 +9,11 @@ import {
 } from "firebase/auth";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
+import {
+  BACKGROUND_IMG_URL,
+  MAIN_LOGO_URL,
+  PROFILE_LOGO_URL,
+} from "../utils/constants";
 
 const Login = () => {
   const [isSignInForm, setIsSignInForm] = useState(true);
@@ -43,8 +48,7 @@ const Login = () => {
             updateProfile(user, {
               displayName: nameRef.current.value,
               //update custom image, I am adding smile user icon
-              photoURL:
-                "https://occ-0-1217-1218.1.nflxso.net/dnm/api/v6/SO2HoVCx33X8phZh2pZZmQ4QgNY/AAAABS8sWFjSyj1zyfgcnGamqyJ1E2ZubZGo8dndCM_ipf_5UpmVlkuf8IXzQlmPZQqTMWNjWukESRdLkFGHnf7zbY3MJCO3r4s.png?r=229",
+              photoURL: PROFILE_LOGO_URL,
             })
               .then(() => {
                 // Profile updated!
@@ -108,7 +112,7 @@ const Login = () => {
       <div className="absolute w-full h-full">
         <img
           className="w-full h-full object-cover"
-          src="https://assets.nflxext.com/ffe/siteui/vlv3/8027eb3f-343a-499d-9892-e683c12e3cb1/web/IE-en-20260608-TRIFECTA-perspective_8be89c0e-d22e-485b-ac7b-0e15972cbea6_large.jpg"
+          src={BACKGROUND_IMG_URL}
           alt="logo"
         />
       </div>
