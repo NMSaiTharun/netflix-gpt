@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { API_OPTIONS } from "../src/utils/tmdb";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { addNowPlayingMovies } from "../src/utils/moviesSlice";
 const useNowPlayingMovies = () => {
   const dispatch = useDispatch();
@@ -16,6 +16,5 @@ const useNowPlayingMovies = () => {
   useEffect(() => {
     getNowPlayingMovies();
   }, []);
-  const moviesStore = useSelector((a) => a.movies);
 };
 export default useNowPlayingMovies;
