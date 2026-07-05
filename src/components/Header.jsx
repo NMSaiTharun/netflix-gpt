@@ -5,10 +5,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { addUser, removeUser } from "../utils/userSlice";
 import { toggleGptSearchView } from "../utils/gptSlice";
+import lang from "../utils/languageConstants";
+import { SUPPORTED_LANGUAGES } from "../utils/constants";
+import { changeLanguage } from "../utils/languageConfigSlice";
 
 const Header = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const gptSelector = useSelector((a) => a.gpt);
 
   const callSignOut = () => {
     signOut(auth)
@@ -23,6 +27,10 @@ const Header = () => {
 
   const handleGPTSearch = () => {
     dispatch(toggleGptSearchView());
+  };
+  //const langSelector = useSelector((store) => store.languageConfig);
+  const handleLanguageChange = (e) => {
+    dispatch(changeLanguage(e.target.value));
   };
   const user = useSelector((store) => store.user);
   useEffect(() => {
@@ -58,6 +66,18 @@ const Header = () => {
       </h1>
       {user && (
         <div className="flex p-2">
+          {gptSelector.showGptSearch && (
+            <select
+              className="bg-blue-700 text-white px-2 py-1"
+              onChange={handleLanguageChange}
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <option key={lang.identifier} value={lang.identifier}>
+                  {lang.name}
+                </option>
+              ))}
+            </select>
+          )}
           <button
             className="py-2 px-4 bg-purple-800 mx-4 my-2 text-white cursor-pointer rounded-xl text-xl"
             onClick={handleGPTSearch}
