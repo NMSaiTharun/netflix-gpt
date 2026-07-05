@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { addUser, removeUser } from "../utils/userSlice";
+import { toggleGptSearchView } from "../utils/gptSlice";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -18,6 +19,10 @@ const Header = () => {
         // An error happened.
         navigate("/error");
       });
+  };
+
+  const handleGPTSearch = () => {
+    dispatch(toggleGptSearchView());
   };
   const user = useSelector((store) => store.user);
   useEffect(() => {
@@ -53,6 +58,12 @@ const Header = () => {
       </h1>
       {user && (
         <div className="flex p-2">
+          <button
+            className="py-2 px-4 bg-purple-800 mx-4 my-2 text-white cursor-pointer rounded-xl text-xl"
+            onClick={handleGPTSearch}
+          >
+            GPT Search
+          </button>
           <div className="flex flex-col items-center">
             <img className="w-12 h-12 mb-1" src={user?.photoURL} />
             <p className="font-bold text-white">{user?.displayName}</p>
