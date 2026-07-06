@@ -82,7 +82,7 @@ const Header = () => {
             className="py-2 px-4 bg-purple-800 mx-4 my-2 text-white cursor-pointer rounded-xl text-xl"
             onClick={handleGPTSearch}
           >
-            GPT Search
+            {gptSelector.showGptSearch ? "Home" : "GPT Search"}
           </button>
           <div className="flex flex-col items-center">
             <img className="w-12 h-12 mb-1" src={user?.photoURL} />
