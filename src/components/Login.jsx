@@ -11,7 +11,7 @@ import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
 import {
   BACKGROUND_IMG_URL,
-  MAIN_LOGO_URL,
+
   PROFILE_LOGO_URL,
 } from "../utils/constants";
 
@@ -72,7 +72,6 @@ const Login = () => {
             // ...
           })
           .catch((error) => {
-            const errorCode = error.code;
             const errorMessage = error.message;
             setErrorMessage(errorMessage);
             // ..
@@ -98,7 +97,6 @@ const Login = () => {
             // ...
           })
           .catch((error) => {
-            const errorCode = error.code;
             const errorMessage = error.message;
             setErrorMessage(errorMessage);
           });

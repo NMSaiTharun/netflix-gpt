@@ -8,6 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+api/node_modules
 dist
 dist-ssr
 *.local
@@ -24,4 +25,6 @@ dist-ssr
 *.sw?
 .env
 .firebase/
-tmdb.js
+
+# OneDrive sync staging
+.tmp.driveupload/

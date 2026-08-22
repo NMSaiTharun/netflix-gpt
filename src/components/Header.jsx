@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { addUser, removeUser } from "../utils/userSlice";
 import { toggleGptSearchView } from "../utils/gptSlice";
-import lang from "../utils/languageConstants";
+
 import { SUPPORTED_LANGUAGES } from "../utils/constants";
 import { changeLanguage } from "../utils/languageConfigSlice";
 
@@ -19,7 +19,7 @@ const Header = () => {
       .then(() => {
         // Sign-out successful.
       })
-      .catch((error) => {
+      .catch(() => {
         // An error happened.
         navigate("/error");
       });
