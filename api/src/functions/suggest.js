@@ -78,7 +78,11 @@ app.http("suggest", {
       if (typeof query !== "string" || !query.trim())
         return { status: 400, jsonBody: { error: "Empty query" } };
 
-      const response = await openai.responses.create({
+      // Azure SWA kills a managed function at ~45s and replaces our JSON
+      // with an opaque "Backend call failure". Give up first so the caller
+      // gets a real message.
+      const response = await openai.responses.create(
+        {
         model: "gpt-5-mini",
         tools: [{ type: "web_search", search_context_size: "low" }],
         instructions: [
@@ -99,7 +103,9 @@ app.http("suggest", {
           "Today's date is " + new Date().toISOString().slice(0, 10) + ".",
         ].join(" "),
         input: query.trim().slice(0, 200),
-      });
+        },
+        { timeout: 30000, maxRetries: 0 },
+      );
 
       // Cost visibility: web search is billed per call plus search content
       // tokens, so log both. Cross-check against platform.openai.com/usage.
@@ -124,7 +130,21 @@ app.http("suggest", {
       return { status: 200, jsonBody: { movies } };
     } catch (err) {
       context.error("suggest failed", err);
-      return { status: 500, jsonBody: { error: "Suggestion service failed" } };
+      const name = err?.name || "";
+      if (name === "APIUserAbortError" || name === "AbortError")
+        return {
+          status: 504,
+          jsonBody: { error: "Search timed out, try a simpler query" },
+        };
+      // err.status is set by the OpenAI SDK on API errors (400 bad tool,
+      // 401 bad key, 429 quota). Surfacing it turns a dead end into a clue.
+      const detail = err?.status
+        ? "OpenAI " + err.status + ": " + (err?.message || "").slice(0, 120)
+        : (err?.message || "unknown").slice(0, 120);
+      return {
+        status: 500,
+        jsonBody: { error: "Suggestion service failed -- " + detail },
+      };
     }
   },
 });
