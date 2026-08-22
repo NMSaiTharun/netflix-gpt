@@ -77,12 +77,21 @@ app.http("suggest", {
         return { status: 400, jsonBody: { error: "Empty query" } };
 
       const response = await openai.responses.create({
-        model: "gpt-5-nano",
-        instructions: "Only give 5 movies as comma separated values as output",
-        input:
-          "Act as a Recommendation system and suggest some movies for the query: " +
-          query.trim().slice(0, 200).toUpperCase() +
-          " , Please give me names of 5 movies.",
+        model: "gpt-5-mini",
+        instructions: [
+          "You are a movie recommendation engine.",
+          "Return exactly 5 real, existing movie titles, comma separated.",
+          "Output ONLY the titles: no numbering, no year, no commentary.",
+          "Use each film's commonly known English title so it can be looked",
+          "up in TMDB -- for non-English films use the title TMDB lists.",
+          "Honour every constraint in the request: language or industry",
+          "(Telugu, Korean, ...), genre, era, mood, and actor or director.",
+          "If a requested year is in the future or you are unsure of it,",
+          "fall back to the closest well-known titles that fit the other",
+          "constraints rather than inventing titles.",
+          "Today's date is " + new Date().toISOString().slice(0, 10) + ".",
+        ].join(" "),
+        input: query.trim().slice(0, 200),
       });
 
       const movies = (response.output_text || "")

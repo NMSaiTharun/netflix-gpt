@@ -65,17 +65,29 @@ const GptSearchBar = () => {
         <input
           ref={searchText}
           type="text"
-          className="p-4 m-4 bg-amber-50 col-span-9"
+          disabled={isLoading}
+          onKeyDown={(e) => e.key === "Enter" && handleGPTSearchClick()}
+          className="p-4 m-4 bg-amber-50 col-span-9 disabled:opacity-70"
           placeholder={lang[langSelector].gptSearchPlaceHolder}
         />
         <button
           onClick={handleGPTSearchClick}
           disabled={isLoading}
-          className="py-2 px-4 m-4 bg-red-700 text-white rounded-lg col-span-3 text-2xl cursor-pointer disabled:opacity-50"
+          className="py-2 px-4 m-4 bg-red-700 text-white rounded-lg col-span-3 text-2xl cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          {isLoading ? "..." : lang[langSelector].search}
+          {isLoading && (
+            <span
+              className="inline-block w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin"
+              aria-hidden="true"
+            />
+          )}
+          {isLoading ? "Searching" : lang[langSelector].search}
         </button>
-        {error && <p className="col-span-12 px-4 pb-4 text-red-500">{error}</p>}
+        {error && (
+          <p role="alert" className="col-span-12 px-4 pb-4 text-red-500">
+            {error}
+          </p>
+        )}
       </form>
     </div>
   );
