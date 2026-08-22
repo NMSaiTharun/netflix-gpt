@@ -14,6 +14,9 @@ const GptSearchBar = () => {
     (store) => store.languageConfig.currentLanguage,
   );
 
+  // TMDB search is fuzzy -- "RRR" also returns Takarazuka revues and
+  // "RRRrrrr!!!". Keep only the best match: an exact title hit if there is
+  // one, otherwise the most popular result.
   const searchMovieInTMDB = async (movie) => {
     const movieData = await fetch(
       "https://api.themoviedb.org/3/search/movie?query=" +
@@ -21,9 +24,22 @@ const GptSearchBar = () => {
         "&include_adult=false&language=en-US&page=1",
       API_OPTIONS,
     );
-    if (!movieData.ok) return [];
+    if (!movieData.ok) return null;
     const jsonMovieData = await movieData.json();
-    return jsonMovieData.results ?? [];
+    const results = (jsonMovieData.results ?? []).filter((m) => m.poster_path);
+    if (!results.length) return null;
+
+    const wanted = movie.trim().toLowerCase();
+    const exact = results.find(
+      (m) =>
+        m.title?.toLowerCase() === wanted ||
+        m.original_title?.toLowerCase() === wanted,
+    );
+    if (exact) return exact;
+
+    return results.reduce((best, m) =>
+      (m.popularity ?? 0) > (best.popularity ?? 0) ? m : best,
+    );
   };
 
   const handleGPTSearchClick = async () => {
@@ -47,7 +63,10 @@ const GptSearchBar = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Search failed");
 
-      const tmdbResults = await Promise.all(data.movies.map(searchMovieInTMDB));
+      const matches = await Promise.all(data.movies.map(searchMovieInTMDB));
+      const tmdbResults = matches.filter(Boolean);
+      if (!tmdbResults.length)
+        throw new Error("No matching movies found, try rephrasing");
       dispatch(addGptMovieResult({ movieNames: data.movies, tmdbResults }));
     } catch (err) {
       setError(err.message);
