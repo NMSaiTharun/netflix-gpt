@@ -6,7 +6,9 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 // Per-user throttle. In-memory, so it resets whenever Azure recycles the
 // instance -- enough to stop casual abuse, not a real quota system.
 const hits = new Map();
-const LIMIT = 20;
+// Web search costs ~1c per call, so the per-user ceiling is deliberately
+// low: 5/hour caps one visitor at roughly 5c per hour.
+const LIMIT = 5;
 const WINDOW_MS = 60 * 60 * 1000;
 
 const rateLimited = (uid) => {
@@ -78,6 +80,7 @@ app.http("suggest", {
 
       const response = await openai.responses.create({
         model: "gpt-5-mini",
+        tools: [{ type: "web_search", search_context_size: "low" }],
         instructions: [
           "You are a movie recommendation engine.",
           "Return exactly 5 real, existing movie titles, comma separated.",
@@ -86,13 +89,28 @@ app.http("suggest", {
           "up in TMDB -- for non-English films use the title TMDB lists.",
           "Honour every constraint in the request: language or industry",
           "(Telugu, Korean, ...), genre, era, mood, and actor or director.",
-          "If a requested year is in the future or you are unsure of it,",
-          "fall back to the closest well-known titles that fit the other",
-          "constraints rather than inventing titles.",
+          "You have a web_search tool. Use it whenever the request depends",
+          "on facts you cannot know from memory -- recent or upcoming",
+          "releases, box-office results, hit or flop verdicts, awards.",
+          "Trust what you find over what you remember.",
+          "If search finds fewer than 5 qualifying films, list those first",
+          "and fill the remainder with the closest matches, rather than",
+          "inventing titles.",
           "Today's date is " + new Date().toISOString().slice(0, 10) + ".",
         ].join(" "),
         input: query.trim().slice(0, 200),
       });
+
+      // Cost visibility: web search is billed per call plus search content
+      // tokens, so log both. Cross-check against platform.openai.com/usage.
+      const u = response.usage || {};
+      context.log(
+        "usage uid=%s in=%s out=%s total=%s",
+        uid,
+        u.input_tokens ?? "?",
+        u.output_tokens ?? "?",
+        u.total_tokens ?? "?",
+      );
 
       const movies = (response.output_text || "")
         .split(",")
