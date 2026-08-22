@@ -84,6 +84,10 @@ app.http("suggest", {
       const response = await openai.responses.create(
         {
         model: "gpt-5-mini",
+        // gpt-5-mini reasons before answering, and that plus a web search
+        // was blowing past 30s. Low effort keeps enough deliberation to
+        // decide to search and read results, without the long think.
+        reasoning: { effort: "low" },
         tools: [{ type: "web_search", search_context_size: "low" }],
         instructions: [
           "You are a movie recommendation engine.",
@@ -104,7 +108,7 @@ app.http("suggest", {
         ].join(" "),
         input: query.trim().slice(0, 200),
         },
-        { timeout: 30000, maxRetries: 0 },
+        { timeout: 40000, maxRetries: 0 },
       );
 
       // Cost visibility: web search is billed per call plus search content
@@ -131,7 +135,12 @@ app.http("suggest", {
     } catch (err) {
       context.error("suggest failed", err);
       const name = err?.name || "";
-      if (name === "APIUserAbortError" || name === "AbortError")
+      const timedOut =
+        name === "APIUserAbortError" ||
+        name === "AbortError" ||
+        name === "APIConnectionTimeoutError" ||
+        /timed out/i.test(err?.message || "");
+      if (timedOut)
         return {
           status: 504,
           jsonBody: { error: "Search timed out, try a simpler query" },
