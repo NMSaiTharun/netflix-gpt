@@ -53,8 +53,10 @@ app.http("suggest", {
           jsonBody: { error: "Server misconfigured: FIREBASE_API_KEY not set" },
         };
 
-      const authHeader = request.headers.get("authorization") || "";
-      const idToken = authHeader.replace(/^Bearer\s+/i, "");
+      // Azure SWA reserves the Authorization header for its own built-in
+      // auth and overwrites it before the request reaches this function,
+      // so the Firebase ID token travels in a custom header instead.
+      const idToken = (request.headers.get("x-firebase-token") || "").trim();
       if (!idToken || idToken === "undefined")
         return { status: 401, jsonBody: { error: "Not signed in" } };
 

@@ -40,7 +40,7 @@ const GptSearchBar = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer " + idToken,
+          "X-Firebase-Token": idToken,
         },
         body: JSON.stringify({ query }),
       });
