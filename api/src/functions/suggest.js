@@ -32,9 +32,14 @@ const verifyIdToken = async (idToken) => {
       body: JSON.stringify({ idToken }),
     },
   );
-  if (!res.ok) return null;
-  const json = await res.json();
-  return json?.users?.[0]?.localId ?? null;
+  const json = await res.json().catch(() => null);
+  if (!res.ok) {
+    // Surface Google's reason so a misconfigured key is distinguishable
+    // from a genuinely bad token. Never includes the key itself.
+    return { uid: null, reason: json?.error?.message || "HTTP " + res.status };
+  }
+  const uid = json?.users?.[0]?.localId ?? null;
+  return { uid, reason: uid ? null : "NO_USER_IN_LOOKUP" };
 };
 
 app.http("suggest", {
@@ -42,12 +47,22 @@ app.http("suggest", {
   authLevel: "anonymous",
   handler: async (request, context) => {
     try {
+      if (!process.env.FIREBASE_API_KEY)
+        return {
+          status: 500,
+          jsonBody: { error: "Server misconfigured: FIREBASE_API_KEY not set" },
+        };
+
       const authHeader = request.headers.get("authorization") || "";
       const idToken = authHeader.replace(/^Bearer\s+/i, "");
-      if (!idToken) return { status: 401, jsonBody: { error: "Not signed in" } };
+      if (!idToken || idToken === "undefined")
+        return { status: 401, jsonBody: { error: "Not signed in" } };
 
-      const uid = await verifyIdToken(idToken);
-      if (!uid) return { status: 401, jsonBody: { error: "Invalid session" } };
+      const { uid, reason } = await verifyIdToken(idToken);
+      if (!uid) {
+        context.warn("token verification failed: " + reason);
+        return { status: 401, jsonBody: { error: "Invalid session: " + reason } };
+      }
 
       if (rateLimited(uid))
         return {
